@@ -1,0 +1,55 @@
+# Ansible playbook used to setup 3-tier application
+# With two application server and one databse server
+# Application server will be build in django and
+# Database base on maria db server
+
+---
+- name: setup  app server
+  hosts: webservers
+  #Variable definition
+  vars:
+    - packages:
+        - MySQL-python.x86_64
+        - python-setuptools
+        - python-pip
+  tasks:
+    - name: install all requirement details for websever
+      yum:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ packages }}"
+
+    - name: djangi environment installation
+      pip:
+        name: django<2
+
+    - name: Check to see if django package was install successfull
+      command: "python -c 'import django' print django.get_version()"
+
+
+- name: setting up database server
+  hosts: db
+  tasks:
+    - name: installation of Mariadb server
+      yum:
+        name: mariadb-server
+        state: latest
+
+    - name: Requirement for mysql-python 
+      yum:
+        name: MySQL-python
+        state: present
+
+    - name: start mariadb
+      service:
+        name: mariadb
+        state: started
+        enabled: yes
+    
+    - name: configure mariadb connection
+      mysql_user:
+        name: django
+        password: 12345
+        priv: '*.*:ALL'
+        state: present
+
