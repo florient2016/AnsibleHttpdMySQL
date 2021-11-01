@@ -19,7 +19,7 @@
         state: present
       loop: "{{ packages }}"
 
-    - name: djangi environment installation
+    - name: django environment installation
       pip:
         name: django<2
 
